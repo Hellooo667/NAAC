@@ -99,27 +99,45 @@ const IBMIntegrationStatus = () => {
     setTestingService(serviceName);
     
     try {
-      const response = await fetch(`/api/health/check/${serviceName}`, {
+      // Use the API base URL from environment
+      const apiBaseUrl = process.env.NODE_ENV === 'production' 
+        ? process.env.REACT_APP_API_BASE_URL_PRODUCTION 
+        : process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${apiBaseUrl}/health/check/${serviceName}`, {
         method: 'GET',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
+      
+      // Check if response is ok first
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       
       const data = await response.json();
       
       setServices(prev => ({
         ...prev,
         [serviceName]: {
-          status: response.ok ? 'connected' : 'error',
+          status: data.status === 'connected' ? 'connected' : 'error',
           endpoint: data.endpoint || '',
           lastCheck: new Date(),
-          error: response.ok ? null : data.error,
+          error: data.error || null,
           details: data.details || {},
         }
       }));
       
     } catch (error) {
+      console.error(`Error checking ${serviceName}:`, error);
       setServices(prev => ({
         ...prev,
         [serviceName]: {
@@ -127,6 +145,67 @@ const IBMIntegrationStatus = () => {
           endpoint: '',
           lastCheck: new Date(),
           error: error.message,
+        }
+      }));
+    } finally {
+      setTestingService(null);
+    }
+  };
+
+  const testServiceFunctionality = async (serviceName) => {
+    setTestingService(serviceName);
+    
+    try {
+      // Use the API base URL from environment
+      const apiBaseUrl = process.env.NODE_ENV === 'production' 
+        ? process.env.REACT_APP_API_BASE_URL_PRODUCTION 
+        : process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${apiBaseUrl}/services/test/${serviceName}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
+      
+      const data = await response.json();
+      
+      // Update service status with test results
+      setServices(prev => ({
+        ...prev,
+        [serviceName]: {
+          ...prev[serviceName],
+          status: data.success ? 'connected' : 'error',
+          lastCheck: new Date(),
+          error: data.success ? null : 'Test failed',
+          testResult: data,
+        }
+      }));
+      
+      // Show success message
+      if (data.success) {
+        console.log(`${serviceName} test successful:`, data.message);
+      }
+      
+    } catch (error) {
+      console.error(`Error testing ${serviceName}:`, error);
+      setServices(prev => ({
+        ...prev,
+        [serviceName]: {
+          ...prev[serviceName],
+          status: 'error',
+          lastCheck: new Date(),
+          error: `Test failed: ${error.message}`,
         }
       }));
     } finally {
@@ -297,6 +376,15 @@ const IBMIntegrationStatus = () => {
                       onClick={() => checkServiceStatus(serviceKey)}
                       disabled={testingService === serviceKey}
                       startIcon={testingService === serviceKey ? <Warning /> : <Refresh />}
+                    >
+                      {testingService === serviceKey ? 'Checking...' : 'Check'}
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => testServiceFunctionality(serviceKey)}
+                      disabled={testingService === serviceKey}
+                      startIcon={testingService === serviceKey ? <Warning /> : <Settings />}
                     >
                       {testingService === serviceKey ? 'Testing...' : 'Test'}
                     </Button>
