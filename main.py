@@ -17,7 +17,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",  # Local development
         "http://localhost:3001",  # Alternative local port
-        "https://your-frontend-url.onrender.com",  # Production frontend URL
+        "https://naac-omega.vercel.app",  # Production Vercel frontend
+        "https://naac-0dgf.onrender.com",  # Self-reference for health checks
         "*"  # Allow all for development (remove in production)
     ],
     allow_credentials=True,
