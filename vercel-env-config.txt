@@ -1,0 +1,41 @@
+# Vercel Environment Variables Configuration
+# Copy these to your Vercel dashboard: https://vercel.com/dashboard
+
+# Backend API Configuration
+REACT_APP_API_BASE_URL_PRODUCTION=https://naac-0dgf.onrender.com/api
+
+# IBM Cloud Services (Production Keys)
+REACT_APP_IBM_CLOUD_API_KEY=9fuj-9NfBcdZ-lmEscm3NKdihToKxxkdbkbi0BkiACLi
+REACT_APP_IBM_GRANITE_MODEL_ID=ibm/granite-13b-chat-v2
+REACT_APP_IBM_GRANITE_URL=https://us-south.ml.cloud.ibm.com/ml/v1/text/generation
+REACT_APP_IBM_PROJECT_ID=075535e4-fd4e-4071-b4c4-ace54af879f0
+
+# Pinecone Vector Database
+REACT_APP_PINECONE_API_KEY=pcsk_6v2ZiA_TYz5pLCSgrkoJBihq9XdAMDG3h9xXhKJsL3kutz9aob195nDWLS8MHxUnCxbALP
+REACT_APP_PINECONE_ENVIRONMENT=us-east-1
+REACT_APP_PINECONE_INDEX_NAME=naac-documents
+REACT_APP_PINECONE_PROJECT_ID=e73de675-8e91-44f3-b37d-78946c477d56
+
+# Cohere for embeddings
+REACT_APP_COHERE_API_KEY=slUrgq8EkP0MHjkAEXzj5ESMZ3YaWN9HmBbO0j3e
+
+# IBM Watson NLP
+REACT_APP_WATSON_NLP_API_KEY=OkI9QE5t08S1l37lGxWK0uKpGw16w6OfGvMnQOIDYKQP
+REACT_APP_WATSON_NLP_URL=https://api.au-syd.natural-language-understanding.watson.cloud.ibm.com/instances/28b71227-a25e-4b52-bbb6-abb6c785c088
+REACT_APP_WATSON_NLP_VERSION=2022-08-10
+
+# IBM Cloud Object Storage
+REACT_APP_IBM_COS_API_KEY=NR0u1TDUfi_-dUZnNA5Pu3EAIuSWsFHxLrWs5jxJn-QV
+REACT_APP_IBM_COS_INSTANCE_CRN=crn:v1:bluemix:public:cloud-object-storage:global:a/2767d540f76c49c0aa47f1e7916647f0:1ca60a0a-435c-49f7-879a-ab8bdb14b90b::
+REACT_APP_IBM_COS_ENDPOINT=https://control.cloud-object-storage.cloud.ibm.com/v2/endpoints
+REACT_APP_IBM_COS_BUCKET_NAME=NAAC_fr
+
+# IBM App ID
+REACT_APP_IBM_APP_ID_CLIENT_ID=22b026e1-fb4d-4d88-adc0-41a51057e182
+REACT_APP_IBM_APP_ID_OAUTH_SERVER_URL=https://au-syd.appid.cloud.ibm.com/oauth/v4/c4504474-b926-43a9-983b-83a54bf170bb/IBMid/callback
+REACT_APP_IBM_APP_ID_DISCOVERY_ENDPOINT=https://au-syd.appid.cloud.ibm.com/oauth/v4/c4504474-b926-43a9-983b-83a-54bf170bb/.well-known/openid-configuration
+
+# Application Settings
+REACT_APP_APP_NAME=NAAC AI Assistant
+REACT_APP_VERSION=1.0.0
+REACT_APP_ENVIRONMENT=production
