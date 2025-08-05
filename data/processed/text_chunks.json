@@ -1,0 +1,36 @@
+{
+  "chunks": [
+    {
+      "content": "NATIONAL ASSESSMENT AND ACCREDITATION COUNCIL (NAAC)\nSelf Study Report (SSR)\n\n1. EXECUTIVE SUMMARY\n\n1.1 INTRODUCTION\nThe institution is committed to providing quality higher education and has established comprehensive mechanisms for quality assurance. This Self Study Report (SSR) presents a detailed analysis of the institution's performance across seven criteria.\n\n1.2 INSTITUTIONAL PROFILE\nName of the Institution: Sample College\nYear of Establishment: 1985\nType: Government/Government Aided/Self-financing\nAcademic Programs: Undergraduate, Postgraduate, Research\n\n2. INSTITUTIONAL PREPAREDNESS FOR ACCREDITATION\n\n2.1 QUALITY POLICY\nThe institution has a well-defined quality policy that emphasizes excellence in teaching, learning, and research.\n\n2.2 IQAC (Internal Quality Assurance Cell)\nThe IQAC functions effectively with regular meetings and quality enhancement initiatives.\n\n3. CRITERIA-WISE ANALYSIS",
+      "metadata": {
+        "source": "sample_naac_ssr",
+        "chunk_id": "sample_naac_ssr_chunk_1",
+        "chunk_index": 0,
+        "total_chunks": 3,
+        "doc_type": "naac_document"
+      }
+    },
+    {
+      "content": "3. CRITERIA-WISE ANALYSIS\n\n3.1 CRITERIA I: CURRICULAR ASPECTS\nThe institution offers diverse programs aligned with university guidelines and industry requirements.\n\n3.2 CRITERIA II: TEACHING-LEARNING AND EVALUATION\nInnovative teaching methodologies and fair evaluation practices are implemented.\n\n3.3 CRITERIA III: RESEARCH, INNOVATIONS AND EXTENSION\nThe institution encourages research activities and community engagement.\n\n3.4 CRITERIA IV: INFRASTRUCTURE AND LEARNING RESOURCES\nAdequate infrastructure and modern learning resources support academic activities.\n\n3.5 CRITERIA V: STUDENT SUPPORT AND PROGRESSION\nComprehensive student support services ensure holistic development.\n\n3.6 CRITERIA VI: GOVERNANCE, LEADERSHIP AND MANAGEMENT\nEffective governance structures and leadership promote institutional growth.\n\n3.7 CRITERIA VII: INSTITUTIONAL VALUES AND BEST PRACTICES\nThe institution upholds ethical values and implements innovative best practices.",
+      "metadata": {
+        "source": "sample_naac_ssr",
+        "chunk_id": "sample_naac_ssr_chunk_2",
+        "chunk_index": 1,
+        "total_chunks": 3,
+        "doc_type": "naac_document"
+      }
+    },
+    {
+      "content": "3.7 CRITERIA VII: INSTITUTIONAL VALUES AND BEST PRACTICES\nThe institution upholds ethical values and implements innovative best practices.\n\n4. CONCLUSION\nThe institution demonstrates commitment to quality education and continuous improvement.",
+      "metadata": {
+        "source": "sample_naac_ssr",
+        "chunk_id": "sample_naac_ssr_chunk_3",
+        "chunk_index": 2,
+        "total_chunks": 3,
+        "doc_type": "naac_document"
+      }
+    }
+  ],
+  "total_chunks": 3,
+  "processing_timestamp": "2025-08-04T22:14:58.156170"
+}
