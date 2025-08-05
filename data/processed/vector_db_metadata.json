@@ -3,7 +3,7 @@
   "total_chunks": 3,
   "database_path": "/home/hari/naac/data/processed/chroma_db",
   "collection_name": "naac_documents",
-  "creation_timestamp": "2025-08-04T22:15:46.399172",
+  "creation_timestamp": "2025-08-05T07:07:07.863730",
   "chunk_sources": [
     "sample_naac_ssr"
   ]
