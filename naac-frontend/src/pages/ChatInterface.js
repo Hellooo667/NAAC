@@ -141,119 +141,339 @@ const ChatInterface = () => {
   };
 
   const generateBotResponse = (userInput) => {
-    // Simulate different types of responses based on input
-    const responses = {
-      'criterion 1': {
-        content: `**Criterion 1: Curricular Aspects** focuses on the planning and implementation of curriculum. Here are the key areas:
+    const lowerInput = userInput.toLowerCase();
+    
+    // Enhanced keyword detection with more specific responses
+    const keywordResponses = {
+      // Criteria-specific responses
+      'criterion 1': () => `**Criterion 1: Curricular Aspects**
 
-**1.1 Curricular Planning and Implementation**
-- Effective curriculum planning through well-defined processes
-- Adherence to academic calendar for Continuous Internal Evaluation (CIE)
-- Regular curriculum committee meetings with stakeholder participation
+Your query about "${userInput}" relates to curriculum planning and implementation. Here's what you need to know:
 
-**1.2 Academic Flexibility**
-- Multiple entry and exit options for students
-- Choice-Based Credit System (CBCS) implementation  
-- Interdisciplinary program offerings
+**Key Sub-criteria:**
+1.1 Curricular Planning and Implementation
+1.2 Academic Flexibility  
+1.3 Curriculum Enrichment
+1.4 Feedback System
 
-**1.3 Curriculum Enrichment**
-- Integration of crosscutting issues (Professional Ethics, Gender, Human Values, Environment)
-- Value-added courses in relevant areas
-- Skill development programs
-
-**1.4 Feedback System**
-- Systematic feedback from students, teachers, employers, and alumni
-- Analysis of feedback and action taken for improvement
-
-**Key Documents Required:**
-- Minutes of curriculum committee meetings
+**Documents Required:**
 - Academic calendar with CIE schedule
+- Curriculum committee meeting minutes
 - Feedback analysis reports
-- Course outcome mapping documents`,
-        sources: [
-          'NAAC Manual for Universities (2020)',
-          'Curriculum Guidelines Document',
-          'Best Practices Database'
-        ]
-      },
-      'ssr': {
-        content: `**Self-Study Report (SSR) Preparation Guide:**
+- Course outcome mapping
 
-**Essential Documents Needed:**
+Need specific guidance on any sub-criterion?`,
 
-**📋 Institutional Information:**
-- Institution profile and organizational structure
-- Academic programs and course details
-- Faculty and staff information
-- Infrastructure details
+      'criterion 2': () => `**Criterion 2: Teaching-Learning and Evaluation**
 
-**📊 Data Requirements:**
-- Last 5 years statistical data for all criteria
-- Financial statements and budget documents
-- Student enrollment and progression data
-- Research publications and citations
+Based on your question "${userInput}", here's guidance on teaching-learning processes:
 
-**📝 Evidence Files:**
-- Policy documents and institutional procedures
-- Committee meeting minutes
-- Feedback reports and analysis
-- Best practice documentation
-- Innovation and extension activity records
+**Key Areas:**
+2.1 Student Enrollment and Profile
+2.2 Catering to Student Diversity
+2.3 Teaching-Learning Process
+2.4 Teacher Profile and Quality
+2.5 Evaluation Process and Reforms
+2.6 Student Performance and Learning Outcomes
 
-**💡 Pro Tips:**
-- Start data collection 6 months before submission
-- Ensure all data is verified and authenticated
-- Use the NAAC Data Template for consistency
-- Include supporting photographs and testimonials
+**Focus Points:**
+- Student-centric methods
+- ICT-enabled learning
+- Continuous assessment
+- Learning outcome measurement`,
 
-Would you like detailed guidance on any specific section of the SSR?`,
-        sources: [
-          'NAAC SSR Guidelines 2020',
-          'Data Template Documentation',
-          'Institutional Best Practices'
-        ]
-      },
-      'default': {
-        content: `Based on your query, I can provide guidance on NAAC accreditation processes. Here are some areas where I can help:
+      'criterion 3': () => `**Criterion 3: Research, Innovations and Extension**
 
-🎯 **Specific Assistance Available:**
-- Detailed criterion-wise guidance (Criteria 1-7)
-- SSR preparation and documentation
-- Best practices identification and implementation
-- Quality indicator improvements
+Your inquiry about "${userInput}" involves research and innovation aspects:
+
+**Sub-criteria Coverage:**
+3.1 Resource Mobilization for Research
+3.2 Innovation Ecosystem
+3.3 Research Publications and Awards
+3.4 Extension Activities
+3.5 Collaboration
+
+**Key Metrics:**
+- Research projects and funding
+- Publications in peer-reviewed journals
+- Patents and innovations
+- Community engagement programs`,
+
+      'criterion 4': () => `**Criterion 4: Infrastructure and Learning Resources**
+
+Regarding "${userInput}" and infrastructure requirements:
+
+**Essential Components:**
+4.1 Physical Facilities
+4.2 Library as a Learning Resource
+4.3 IT Infrastructure
+4.4 Maintenance of Campus Facilities
+
+**Documentation Needed:**
+- Infrastructure utilization reports
+- Library resource analysis
+- IT infrastructure audit
+- Maintenance schedules and records`,
+
+      'criterion 5': () => `**Criterion 5: Student Support and Progression**
+
+Your question "${userInput}" relates to student welfare and progression:
+
+**Key Focus Areas:**
+5.1 Student Support
+5.2 Student Progression
+5.3 Student Participation and Activities
+5.4 Alumni Engagement
+
+**Support Systems:**
+- Scholarships and financial aid
+- Mentoring and counseling
+- Career guidance and placement
+- Alumni network engagement`,
+
+      'criterion 6': () => `**Criterion 6: Governance, Leadership and Management**
+
+Addressing "${userInput}" in context of institutional governance:
+
+**Core Elements:**
+6.1 Institutional Vision and Leadership
+6.2 Strategy Development and Deployment
+6.3 Faculty Empowerment Strategies
+6.4 Financial Management and Resource Mobilization
+6.5 Internal Quality Assurance System
+
+**Key Documents:**
+- Strategic plans and policies
+- Financial audits and budgets
+- IQAC meeting minutes
+- Quality enhancement initiatives`,
+
+      'criterion 7': () => `**Criterion 7: Institutional Values and Best Practices**
+
+Your query "${userInput}" concerns institutional values:
+
+**Sub-criteria:**
+7.1 Institutional Values and Social Responsibilities
+7.2 Best Practices
+7.3 Institutional Distinctiveness
+
+**Focus Areas:**
+- Environmental consciousness
+- Social responsibility initiatives
+- Innovative practices
+- Unique institutional features`,
+
+      // SSR and Documentation
+      'ssr': () => `**SSR Preparation for: "${userInput}"**
+
+**Timeline Recommendations:**
+- Start 12 months before submission
+- Data collection: 6 months
+- Writing phase: 4 months
+- Review and finalization: 2 months
+
+**Essential Components:**
+📋 Executive Summary
+📊 Profile of the Institution
+📈 Criterion-wise Analysis (1-7)
+📎 Supporting Documents
+📸 Photographs and Evidence
+
+**Quality Tips:**
+- Use quantitative data with trends
+- Include stakeholder feedback
+- Highlight innovations and best practices
+- Ensure document authenticity`,
+
+      // Grading and Assessment
+      'grade': () => `**NAAC Grading System for "${userInput}"**
+
+**Grade Classifications:**
+- A++ (CGPA 3.51-4.00): Accredited
+- A+ (CGPA 3.26-3.50): Accredited  
+- A (CGPA 3.01-3.25): Accredited
+- B++ (CGPA 2.76-3.00): Accredited
+- B+ (CGPA 2.51-2.75): Accredited
+- B (CGPA 2.01-2.50): Accredited
+- C (CGPA 1.51-2.00): Accredited
+
+**CGPA Calculation:**
+Based on 7 criteria with specific weightages
+Quality Indicator (QI) wise assessment
+Peer team evaluation and institutional presentation`,
+
+      // Research and Publications
+      'research': () => `**Research Guidance for "${userInput}"**
+
+**Key Research Metrics:**
+📊 Faculty publications in peer-reviewed journals
+🏆 Research awards and recognitions
+💰 Research funding and grants
+🔬 Research facilities and infrastructure
+🤝 Industry collaborations
+
+**Enhancement Strategies:**
+- Establish research committees
+- Create seed money for research
+- Encourage interdisciplinary research
+- Develop industry partnerships
+- Support faculty for research degrees`,
+
+      // Teaching and Learning
+      'teaching': () => `**Teaching-Learning Enhancement for "${userInput}"**
+
+**Modern Approaches:**
+👨‍🏫 Student-centric pedagogy
+💻 ICT-enabled learning
+🎯 Outcome-based education
+📝 Continuous assessment
+🔄 Feedback implementation
+
+**Quality Indicators:**
+- Student-teacher ratio
+- Use of technology in teaching
+- Learning outcome measurement
+- Student progression rates
+- Employer feedback on graduates`,
+
+      // Infrastructure
+      'infrastructure': () => `**Infrastructure Analysis for "${userInput}"**
+
+**Assessment Areas:**
+🏢 Classroom and laboratory facilities
+📚 Library resources and services
+💻 IT infrastructure and connectivity
+🏃‍♂️ Sports and recreational facilities
+♿ Accessibility features
+
+**Quality Parameters:**
+- Space utilization efficiency
+- Equipment and resource adequacy
+- Maintenance and upkeep standards
+- Safety and security measures
+- Environmental sustainability`,
+
+      // Best Practices
+      'best practice': () => `**Best Practices Related to "${userInput}"**
+
+**Identification Criteria:**
+✨ Innovation and uniqueness
+📈 Measurable outcomes
+🔄 Sustainability and continuity
+📊 Evidence-based impact
+🌟 Replicability potential
+
+**Documentation Requirements:**
+- Clear objectives and context
+- Implementation methodology
+- Resource requirements
+- Impact assessment data
+- Lessons learned and challenges`,
+
+      // Default enhanced response
+      'default': () => {
+        const responses = [
+          `I understand you're asking about "${userInput}". Let me provide specific guidance on this NAAC-related topic.
+
+**Relevant Areas:**
+- Institutional quality enhancement
+- Accreditation process guidance
+- Best practice implementation
+- Documentation requirements
+
+**How I Can Help:**
+- Criterion-specific guidance (1-7)
+- SSR preparation assistance
+- Quality indicator improvement
 - Peer team visit preparation
-- Post-accreditation quality sustenance
 
-🔍 **My Knowledge Base Includes:**
-- Latest NAAC manuals and guidelines
-- Institutional best practices from 500+ colleges
-- Common challenges and solutions
-- Assessment methodologies and rubrics
+Please specify which criterion or aspect you'd like me to focus on for a more detailed response.`,
 
-Please feel free to ask specific questions about any NAAC criterion, documentation requirements, or accreditation processes. I'm here to provide detailed, contextual guidance based on the latest NAAC framework.`,
-        sources: [
-          'NAAC Assessment Framework',
-          'Institutional Database',
-          'Quality Guidelines'
-        ]
+          `Thank you for your question about "${userInput}". This relates to important aspects of NAAC accreditation.
+
+**Key Considerations:**
+- Quality assurance mechanisms
+- Stakeholder satisfaction
+- Continuous improvement processes
+- Evidence-based documentation
+
+**Available Support:**
+- Detailed criterion analysis
+- Document preparation guidance
+- Best practice identification
+- Quality enhancement strategies
+
+Would you like me to elaborate on any specific criterion or process?`,
+
+          `Your inquiry "${userInput}" touches on crucial NAAC accreditation elements.
+
+**Focus Areas:**
+- Institutional effectiveness
+- Quality culture development
+- Systematic improvements
+- Outcome measurement
+
+**Guidance Available:**
+- Step-by-step processes
+- Template and format assistance
+- Quality indicator explanations
+- Assessment preparation tips
+
+Please let me know which specific area you'd like detailed information about.`
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
       }
     };
 
-    const lowerInput = userInput.toLowerCase();
-    let responseKey = 'default';
+    // Enhanced keyword matching
+    let responseGenerator = keywordResponses['default'];
     
     if (lowerInput.includes('criterion 1') || lowerInput.includes('curricular')) {
-      responseKey = 'criterion 1';
+      responseGenerator = keywordResponses['criterion 1'];
+    } else if (lowerInput.includes('criterion 2') || lowerInput.includes('teaching') || lowerInput.includes('learning')) {
+      responseGenerator = keywordResponses['criterion 2'];
+    } else if (lowerInput.includes('criterion 3') || lowerInput.includes('research')) {
+      responseGenerator = keywordResponses['criterion 3'];
+    } else if (lowerInput.includes('criterion 4') || lowerInput.includes('infrastructure')) {
+      responseGenerator = keywordResponses['criterion 4'];
+    } else if (lowerInput.includes('criterion 5') || lowerInput.includes('student support')) {
+      responseGenerator = keywordResponses['criterion 5'];
+    } else if (lowerInput.includes('criterion 6') || lowerInput.includes('governance')) {
+      responseGenerator = keywordResponses['criterion 6'];
+    } else if (lowerInput.includes('criterion 7') || lowerInput.includes('best practice')) {
+      responseGenerator = keywordResponses['criterion 7'];
     } else if (lowerInput.includes('ssr') || lowerInput.includes('self-study') || lowerInput.includes('document')) {
-      responseKey = 'ssr';
+      responseGenerator = keywordResponses['ssr'];
+    } else if (lowerInput.includes('grade') || lowerInput.includes('cgpa') || lowerInput.includes('score')) {
+      responseGenerator = keywordResponses['grade'];
+    } else if (lowerInput.includes('research') || lowerInput.includes('publication')) {
+      responseGenerator = keywordResponses['research'];
+    } else if (lowerInput.includes('teaching') || lowerInput.includes('pedagogy')) {
+      responseGenerator = keywordResponses['teaching'];
+    } else if (lowerInput.includes('infrastructure') || lowerInput.includes('facility')) {
+      responseGenerator = keywordResponses['infrastructure'];
+    } else if (lowerInput.includes('best practice') || lowerInput.includes('innovation')) {
+      responseGenerator = keywordResponses['best practice'];
+    }
+
+    // Generate contextual sources based on the response type
+    let sources = ['NAAC Assessment Framework', 'Quality Guidelines'];
+    
+    if (lowerInput.includes('criterion')) {
+      sources = ['NAAC Manual for Universities (2020)', 'Assessment Guidelines', 'Quality Indicators'];
+    } else if (lowerInput.includes('ssr')) {
+      sources = ['NAAC SSR Guidelines 2020', 'Data Template Documentation', 'Best Practices Database'];
+    } else if (lowerInput.includes('research')) {
+      sources = ['Research Assessment Framework', 'Publication Guidelines', 'Innovation Database'];
     }
 
     return {
       id: Date.now() + 1,
       type: 'bot',
-      content: responses[responseKey].content,
+      content: responseGenerator(),
       timestamp: new Date(),
-      sources: responses[responseKey].sources,
+      sources: sources,
     };
   };
 
