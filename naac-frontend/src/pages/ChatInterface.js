@@ -84,15 +84,60 @@ const ChatInterface = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsTyping(true);
 
-    // Simulate AI response with IBM Granite
-    setTimeout(() => {
-      const botResponse = generateBotResponse(inputMessage);
+    try {
+      // Make actual API call to backend
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com'}/api/chat/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.REACT_APP_IBM_CLOUD_API_KEY}`,
+        },
+        body: JSON.stringify({
+          message: currentInput,
+          context: {
+            timestamp: new Date().toISOString(),
+            userId: 'user-' + Date.now(),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      let botContent;
+      if (data.response === "This is a placeholder response. Backend integration in progress.") {
+        // If backend returns placeholder, use our fallback response
+        const fallbackResponse = generateBotResponse(currentInput);
+        botContent = fallbackResponse.content;
+      } else {
+        botContent = data.response || data.message || 'I received your message but encountered an issue generating a response.';
+      }
+      
+      const botResponse = {
+        id: Date.now() + 1,
+        type: 'bot',
+        content: botContent,
+        timestamp: new Date(),
+        sources: data.sources || [],
+      };
+
       setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Chat API Error:', error);
+      
+      // Fallback to mock response if API fails
+      const botResponse = generateBotResponse(currentInput);
+      setMessages(prev => [...prev, botResponse]);
+    } finally {
       setIsTyping(false);
-    }, 2000);
+    }
   };
 
   const generateBotResponse = (userInput) => {

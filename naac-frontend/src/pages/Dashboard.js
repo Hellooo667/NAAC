@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Grid,
@@ -36,6 +37,7 @@ import DocumentProcessor from '../components/DocumentProcessor';
 import QueryProcessor from '../components/QueryProcessor';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
   const [systemStats, setSystemStats] = useState({
     documentsProcessed: 0,
@@ -83,6 +85,10 @@ const Dashboard = () => {
       ...prev,
       queriesHandled: prev.queriesHandled + 1,
     }));
+  };
+
+  const handleQuickActionClick = (path) => {
+    navigate(path);
   };
 
   const recentActivities = [
@@ -177,6 +183,7 @@ const Dashboard = () => {
                   boxShadow: 4,
                 },
               }}
+              onClick={() => handleQuickActionClick(action.path)}
             >
               <CardContent sx={{ textAlign: 'center', p: 3 }}>
                 <Avatar
@@ -196,7 +203,15 @@ const Dashboard = () => {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   {action.description}
                 </Typography>
-                <Button variant="contained" size="small" sx={{ bgcolor: action.color }}>
+                <Button 
+                  variant="contained" 
+                  size="small" 
+                  sx={{ bgcolor: action.color }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleQuickActionClick(action.path);
+                  }}
+                >
                   Get Started
                 </Button>
               </CardContent>
