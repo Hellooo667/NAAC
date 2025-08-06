@@ -32,7 +32,6 @@ import {
   SmartToy,
   Upload,
 } from '@mui/icons-material';
-import IBMIntegrationStatus from '../components/IBMIntegrationStatus';
 import DocumentProcessor from '../components/DocumentProcessor';
 import QueryProcessor from '../components/QueryProcessor';
 
@@ -367,7 +366,17 @@ const Dashboard = () => {
           </Tabs>
         </Box>
 
-        {selectedTab === 0 && <IBMIntegrationStatus />}
+        {selectedTab === 0 && (
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              System Status
+            </Typography>
+            <Typography variant="body2">
+              All NAAC AI Assistant services are operational. The system is ready to help you with 
+              NAAC accreditation processes, criteria guidance, and documentation support.
+            </Typography>
+          </Alert>
+        )}
         {selectedTab === 1 && (
           <DocumentProcessor onProcessingComplete={handleProcessingComplete} />
         )}

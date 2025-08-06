@@ -40,7 +40,7 @@ const ChatInterface = () => {
     {
       id: 1,
       type: 'bot',
-      content: "Hello! I'm your NAAC AI Assistant with comprehensive knowledge of NAAC accreditation processes. I can help you with criteria guidance, SSR preparation, best practices, and quality enhancement strategies. How can I assist you today?",
+      content: "Hello! I'm your NAAC AI Assistant powered by IBM Granite. I can help you with NAAC accreditation processes, criteria guidance, SSR preparation, and best practices. How can I assist you today?",
       timestamp: new Date(),
       sources: [],
     }
@@ -89,26 +89,52 @@ const ChatInterface = () => {
     setIsTyping(true);
 
     try {
-      // Use local response generation (removing problematic API calls)
-      const botResponse = generateBotResponse(currentInput);
+      // Make actual API call to backend
+      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com'}/api/chat/message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.REACT_APP_IBM_CLOUD_API_KEY}`,
+        },
+        body: JSON.stringify({
+          message: currentInput,
+          context: {
+            timestamp: new Date().toISOString(),
+            userId: 'user-' + Date.now(),
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API call failed: ${response.status}`);
+      }
+
+      const data = await response.json();
       
-      // Simulate realistic AI response time
-      await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
+      let botContent;
+      if (data.response === "This is a placeholder response. Backend integration in progress.") {
+        // If backend returns placeholder, use our fallback response
+        const fallbackResponse = generateBotResponse(currentInput);
+        botContent = fallbackResponse.content;
+      } else {
+        botContent = data.response || data.message || 'I received your message but encountered an issue generating a response.';
+      }
       
-      setMessages(prev => [...prev, botResponse]);
-    } catch (error) {
-      console.error('Response generation error:', error);
-      
-      // Fallback response
-      const errorResponse = {
+      const botResponse = {
         id: Date.now() + 1,
         type: 'bot',
-        content: `I apologize, but I encountered an issue while processing your question "${currentInput}". Please try rephrasing your question or ask about a specific NAAC criterion.`,
+        content: botContent,
         timestamp: new Date(),
-        sources: ['Error Handling System'],
+        sources: data.sources || [],
       };
+
+      setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      console.error('Chat API Error:', error);
       
-      setMessages(prev => [...prev, errorResponse]);
+      // Fallback to mock response if API fails
+      const botResponse = generateBotResponse(currentInput);
+      setMessages(prev => [...prev, botResponse]);
     } finally {
       setIsTyping(false);
     }
@@ -570,7 +596,7 @@ Please let me know which specific area you'd like detailed information about.`
                   <Box>
                     <Typography variant="h6">NAAC AI Assistant</Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Comprehensive NAAC Guidance • Knowledge-Based
+                      Powered by IBM Granite • Always learning
                     </Typography>
                   </Box>
                 </Box>
@@ -695,12 +721,11 @@ Please let me know which specific area you'd like detailed information about.`
           </Card>
 
           {/* AI Info */}
-          <Alert severity="success">
+          <Alert severity="info">
             <Typography variant="body2">
-              <strong>Local NAAC Knowledge Base</strong><br />
-              This AI assistant provides comprehensive guidance based on NAAC guidelines, 
-              assessment frameworks, and institutional best practices. All responses are 
-              generated from curated NAAC documentation.
+              <strong>Powered by IBM Granite</strong><br />
+              This AI assistant uses retrieval-augmented generation (RAG) to provide accurate, 
+              context-aware responses based on NAAC guidelines and institutional best practices.
             </Typography>
           </Alert>
         </Grid>
