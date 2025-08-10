@@ -10,9 +10,11 @@ from datetime import datetime
 import sqlite3
 import hashlib
 from dotenv import load_dotenv
+from pathlib import Path
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from this folder's .env (prefer overriding)
+ENV_PATH = Path(__file__).with_name('.env')
+load_dotenv(dotenv_path=str(ENV_PATH), override=True)
 
 app = FastAPI(
     title="NAAC AI Assistant API",
@@ -696,7 +698,8 @@ async def check_ibm_granite_live():
     gen = _test_granite_generation(token, url, model_id, project_id)
     if gen.get("ok"):
         return {"ok": True, "model_id": model_id, "project_id": project_id, "latency_ms": gen.get("latency_ms")}
-    return {"ok": False, "step": "generation", **gen}
+    # include non-sensitive inputs for diagnostics
+    return {"ok": False, "step": "generation", "model_id": model_id, "project_id": project_id, **gen}
 
 # API Routes placeholder
 @app.get("/api/health/services")
