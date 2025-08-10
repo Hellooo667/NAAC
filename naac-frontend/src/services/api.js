@@ -3,9 +3,9 @@ import axios from 'axios';
 // Base API configuration - automatically detect environment
 const getApiBaseUrl = () => {
   if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com/api';
+    return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com';
   }
-  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
+  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
 };
 
 const API_BASE_URL = getApiBaseUrl();
