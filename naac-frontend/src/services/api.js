@@ -2,10 +2,11 @@ import axios from 'axios';
 
 // Base API configuration - automatically detect environment
 const getApiBaseUrl = () => {
-  if (process.env.NODE_ENV === 'production') {
-    return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com';
-  }
-  return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+  const base = process.env.NODE_ENV === 'production'
+    ? (process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com')
+    : (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000');
+  // Normalize to avoid trailing slash or accidental '/api' suffix
+  return base.replace(/\/+$/, '').replace(/\/api$/, '');
 };
 
 const API_BASE_URL = getApiBaseUrl();
@@ -94,8 +95,9 @@ export const criteriaAPI = {
 // Chat API
 export const chatAPI = {
   sendMessage: async (message, context = {}) => {
-    const response = await api.post('/chat/message', {
+    const response = await api.post('/api/chat/message', {
       message,
+      session_id: context.sessionId,
       context,
       timestamp: new Date().toISOString(),
     });

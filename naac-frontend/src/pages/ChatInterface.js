@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { chatAPI } from '../services/api';
 import {
   Box,
   Card,
@@ -35,16 +36,17 @@ import {
   School,
 } from '@mui/icons-material';
 
+const getInitialBotMessage = () => ({
+  id: Date.now(),
+  type: 'bot',
+  content:
+    "Hello! I'm your NAAC AI Assistant powered by IBM Granite. I can help you with NAAC accreditation processes, criteria guidance, SSR preparation, and best practices. How can I assist you today?",
+  timestamp: new Date(),
+  sources: [],
+});
+
 const ChatInterface = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'bot',
-      content: "Hello! I'm your NAAC AI Assistant powered by IBM Granite. I can help you with NAAC accreditation processes, criteria guidance, SSR preparation, and best practices. How can I assist you today?",
-      timestamp: new Date(),
-      sources: [],
-    }
-  ]);
+  const [messages, setMessages] = useState([getInitialBotMessage()]);
   const [inputMessage, setInputMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
@@ -73,62 +75,32 @@ const ChatInterface = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSendMessage = async () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async (text) => {
+    const messageText = typeof text === 'string' ? text : inputMessage;
+    if (!messageText.trim()) return;
 
     const userMessage = {
       id: Date.now(),
       type: 'user',
-      content: inputMessage,
+      content: messageText,
       timestamp: new Date(),
     };
 
     setMessages(prev => [...prev, userMessage]);
-    const currentInput = inputMessage;
-    setInputMessage('');
+    const currentInput = messageText;
+    if (!text) setInputMessage('');
     setIsTyping(true);
 
     try {
-      // Use correct API base URL - same logic as api.js
-      const getApiBaseUrl = () => {
-        if (process.env.NODE_ENV === 'production') {
-          return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com';
-        }
-        return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-      };
-
-      const apiBaseUrl = getApiBaseUrl();
-      console.log('🔗 Chat API URL:', `${apiBaseUrl}/api/chat/message`);
-
-      // Generate session ID
       let sessionId = localStorage.getItem('naac-session-id');
       if (!sessionId) {
         sessionId = 'session-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('naac-session-id', sessionId);
       }
 
-      const response = await fetch(`${apiBaseUrl}/api/chat/message`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          session_id: sessionId,
-          message: currentInput,
-        }),
-      });
-
-      console.log('📡 Chat API Response Status:', response.status);
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('📡 Chat API Error Response:', errorText);
-        throw new Error(`API call failed: ${response.status} - ${errorText}`);
-      }
-
-      const data = await response.json();
+      const data = await chatAPI.sendMessage(currentInput, { sessionId });
       console.log('📡 Chat API Response Data:', data);
-      
+
       const botResponse = {
         id: Date.now() + 1,
         type: 'bot',
@@ -140,8 +112,6 @@ const ChatInterface = () => {
       setMessages(prev => [...prev, botResponse]);
     } catch (error) {
       console.error('❌ Chat API Error:', error);
-      
-      // Show explicit error instead of fallback
       const errorResponse = {
         id: Date.now() + 1,
         type: 'bot',
@@ -149,111 +119,61 @@ const ChatInterface = () => {
         timestamp: new Date(),
         sources: [],
       };
-      
       setMessages(prev => [...prev, errorResponse]);
     } finally {
       setIsTyping(false);
     }
   };
 
+  const handleClearChat = () => {
+    // Optionally reset session; for now, just clear chat to fresh greeting
+    setMessages([getInitialBotMessage()]);
+    setInputMessage('');
+  };
+
   const handleQuickQuestion = (question) => {
     setInputMessage(question);
+    // Send immediately using explicit text to avoid state timing issues
+    handleSendMessage(question);
   };
 
-  const handleCopyMessage = (content) => {
-    navigator.clipboard.writeText(content);
-  };
-
-  const handleClearChat = () => {
-    setMessages([messages[0]]); // Keep the initial greeting
-  };
-
-  const MessageBubble = ({ message }) => (
-    <Box
-      sx={{
-        display: 'flex',
-        justifyContent: message.type === 'user' ? 'flex-end' : 'flex-start',
-        mb: 2,
-      }}
-    >
-      <Box sx={{ display: 'flex', maxWidth: '80%', alignItems: 'flex-start' }}>
-        {message.type === 'bot' && (
-          <Avatar sx={{ bgcolor: 'primary.main', mr: 1, mt: 0.5 }}>
-            <SmartToy />
+  const MessageBubble = ({ message }) => {
+    const isUser = message.type === 'user';
+    return (
+      <Box sx={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', mb: 2 }}>
+        {!isUser && (
+          <Avatar sx={{ bgcolor: 'primary.main', mr: 1, width: 28, height: 28 }}>
+            <SmartToy fontSize="small" />
           </Avatar>
         )}
-        
         <Paper
           sx={{
-            p: 2,
-            bgcolor: message.type === 'user' ? 'primary.main' : 'grey.100',
-            color: message.type === 'user' ? 'white' : 'text.primary',
+            p: 1.5,
+            maxWidth: '75%',
+            bgcolor: isUser ? 'primary.light' : 'grey.100',
+            color: isUser ? 'primary.contrastText' : 'text.primary',
             borderRadius: 2,
-            maxWidth: '100%',
           }}
         >
-          <Typography
-            variant="body1"
-            sx={{
-              whiteSpace: 'pre-wrap',
-              '& strong': { fontWeight: 'bold' },
-              '& **': { fontWeight: 'bold' },
-            }}
-          >
+          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
             {message.content}
           </Typography>
-          
-          {message.sources && message.sources.length > 0 && (
-            <Box sx={{ mt: 2, pt: 1, borderTop: '1px solid rgba(0,0,0,0.1)' }}>
-              <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
-                Sources:
+          {Array.isArray(message.sources) && message.sources.length > 0 && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="caption" color="text.secondary">
+                Sources: {message.sources.map((s, i) => s.title || s).join(', ')}
               </Typography>
-              {message.sources.map((source, index) => (
-                <Chip
-                  key={index}
-                  label={source}
-                  size="small"
-                  variant="outlined"
-                  sx={{ mr: 0.5, mb: 0.5, fontSize: '0.7rem' }}
-                />
-              ))}
             </Box>
           )}
-          
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-            <Typography variant="caption" color="text.secondary">
-              {message.timestamp.toLocaleTimeString()}
-            </Typography>
-            {message.type === 'bot' && (
-              <Box>
-                <Tooltip title="Copy message">
-                  <IconButton size="small" onClick={() => handleCopyMessage(message.content)}>
-                    <ContentCopy fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Helpful">
-                  <IconButton size="small">
-                    <ThumbUp fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Not helpful">
-                  <IconButton size="small">
-                    <ThumbDown fontSize="small" />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
-          </Box>
         </Paper>
-        
-        {message.type === 'user' && (
-          <Avatar sx={{ bgcolor: 'secondary.main', ml: 1, mt: 0.5 }}>
-            <Person />
+        {isUser && (
+          <Avatar sx={{ bgcolor: 'grey.400', ml: 1, width: 28, height: 28 }}>
+            <Person fontSize="small" />
           </Avatar>
         )}
       </Box>
-    </Box>
-  );
+    );
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>

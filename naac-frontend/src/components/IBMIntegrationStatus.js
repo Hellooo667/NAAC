@@ -100,11 +100,21 @@ const IBMIntegrationStatus = () => {
     
     try {
       // Use the API base URL from environment
-      const apiBaseUrl = process.env.NODE_ENV === 'production' 
-        ? process.env.REACT_APP_API_BASE_URL_PRODUCTION 
-        : process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
-      
-      const response = await fetch(`${apiBaseUrl}/health/check/${serviceName}`, {
+      const apiBaseUrl = process.env.NODE_ENV === 'production'
+        ? (process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com')
+        : (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000');
+
+      // Map friendly names to backend routes when needed
+      const routeMap = {
+        appId: 'ibm-app-id',
+        granite: 'ibm-granite-llm',
+        pinecone: 'pinecone-vector-db',
+        cloudStorage: 'cloud-object-storage',
+        watsonNLP: 'watson-nlp',
+      };
+      const backendService = routeMap[serviceName] || serviceName;
+
+      const response = await fetch(`${apiBaseUrl}/api/health/check/${backendService}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -157,11 +167,20 @@ const IBMIntegrationStatus = () => {
     
     try {
       // Use the API base URL from environment
-      const apiBaseUrl = process.env.NODE_ENV === 'production' 
-        ? process.env.REACT_APP_API_BASE_URL_PRODUCTION 
-        : process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api';
-      
-      const response = await fetch(`${apiBaseUrl}/services/test/${serviceName}`, {
+      const apiBaseUrl = process.env.NODE_ENV === 'production'
+        ? (process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com')
+        : (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000');
+
+      const routeMap = {
+        appId: 'ibm-app-id',
+        granite: 'ibm-granite-llm',
+        pinecone: 'pinecone-vector-db',
+        cloudStorage: 'cloud-object-storage',
+        watsonNLP: 'watson-nlp',
+      };
+      const backendService = routeMap[serviceName] || serviceName;
+
+      const response = await fetch(`${apiBaseUrl}/api/test/${backendService}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
