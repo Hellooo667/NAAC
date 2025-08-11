@@ -266,7 +266,10 @@ const IBMIntegrationStatus = () => {
 
   const saveConfiguration = async () => {
     try {
-      const response = await fetch('/api/config/ibm-services', {
+      const apiBaseUrl = process.env.NODE_ENV === 'production'
+        ? (process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com')
+        : (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000');
+      const response = await fetch(`${apiBaseUrl}/api/config/ibm-services`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -33,6 +33,7 @@ import {
   Description,
 } from '@mui/icons-material';
 import { AILoadingIndicator, ChatMessageSkeleton } from './LoadingComponents';
+import api from '../services/api';
 
 const QueryProcessor = ({ onQueryComplete }) => {
   const [query, setQuery] = useState('');
@@ -81,89 +82,53 @@ const QueryProcessor = ({ onQueryComplete }) => {
       setProcessingStage('Performing semantic search in Pinecone vector database...');
       setProgress(20);
       
-      const searchResponse = await fetch('/api/pinecone/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          query: query,
-          queryType: queryType,
-          topK: 10,
-          includeMetadata: true,
-          namespace: 'naac_documents',
-        }),
+      const searchRes = await api.post('/api/pinecone/query', {
+        query: query,
+        queryType: queryType,
+        topK: 10,
+        includeMetadata: true,
+        namespace: 'naac_documents',
       });
-      
-      if (!searchResponse.ok) throw new Error('Pinecone search failed');
-      const searchResults = await searchResponse.json();
+      const searchResults = searchRes.data;
       
       // Step 2: Context Preparation
       setProcessingStage('Preparing context from retrieved vectors...');
       setProgress(40);
       
-      const contextResponse = await fetch('/api/context/prepare', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          searchResults: searchResults.matches, // Pinecone returns matches array
-          queryType: queryType,
-          maxTokens: 4000,
-        }),
+      const contextRes = await api.post('/api/context/prepare', {
+        searchResults: searchResults.matches,
+        queryType: queryType,
+        maxTokens: 4000,
       });
-      
-      if (!contextResponse.ok) throw new Error('Context preparation failed');
-      const contextData = await contextResponse.json();
+      const contextData = contextRes.data;
       
       // Step 3: Prompt Building
       setProcessingStage('Building specialized prompt for IBM Granite LLM...');
       setProgress(60);
       
-      const promptResponse = await fetch('/api/prompts/build', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          query: query,
-          context: contextData.processedContext,
-          queryType: queryType,
-          format: queryType === 'ssr' ? 'structured_report' : 'conversational',
-        }),
+      const promptRes = await api.post('/api/prompts/build', {
+        query: query,
+        context: contextData.processedContext,
+        queryType: queryType,
+        format: queryType === 'ssr' ? 'structured_report' : 'conversational',
       });
-      
-      if (!promptResponse.ok) throw new Error('Prompt building failed');
-      const promptData = await promptResponse.json();
+      const promptData = promptRes.data;
       
       // Step 4: IBM Granite LLM Generation
       setProcessingStage('Generating response using IBM Granite LLM...');
       setProgress(80);
       
-      const generateResponse = await fetch('/api/llm/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      const generateRes = await api.post('/api/llm/generate', {
+        prompt: promptData.finalPrompt,
+        model: 'ibm/granite-13b-instruct-v2',
+        parameters: {
+          max_new_tokens: queryType === 'ssr' ? 2048 : 1024,
+          temperature: 0.1,
+          top_p: 0.9,
+          repetition_penalty: 1.1,
         },
-        body: JSON.stringify({
-          prompt: promptData.finalPrompt,
-          model: 'ibm/granite-13b-chat-v2',
-          parameters: {
-            max_new_tokens: queryType === 'ssr' ? 2048 : 1024,
-            temperature: 0.1,
-            top_p: 0.9,
-            repetition_penalty: 1.1,
-          },
-        }),
       });
-      
-      if (!generateResponse.ok) throw new Error('LLM generation failed');
-      const generationData = await generateResponse.json();
+      const generationData = generateRes.data;
       
       // Complete processing
       setProcessingStage('Finalizing response...');
@@ -223,26 +188,10 @@ const QueryProcessor = ({ onQueryComplete }) => {
         navigator.clipboard.writeText(message.content);
         break;
       case 'like':
-        // Track positive feedback
-        fetch('/api/feedback/positive', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-          body: JSON.stringify({ messageId: message.id }),
-        });
+  api.post('/api/feedback/positive', { messageId: message.id });
         break;
       case 'dislike':
-        // Track negative feedback
-        fetch('/api/feedback/negative', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-          },
-          body: JSON.stringify({ messageId: message.id }),
-        });
+  api.post('/api/feedback/negative', { messageId: message.id });
         break;
       case 'export':
         const blob = new Blob([message.content], { type: 'text/plain' });

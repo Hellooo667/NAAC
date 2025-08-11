@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   Box,
   Grid,
   Card,
   CardContent,
+  CardActionArea,
   Typography,
   Button,
   Paper,
@@ -34,6 +35,7 @@ import {
 } from '@mui/icons-material';
 import DocumentProcessor from '../components/DocumentProcessor';
 import QueryProcessor from '../components/QueryProcessor';
+import { analyticsAPI } from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -46,49 +48,18 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Fetch system statistics
     const fetchStats = async () => {
       try {
-        // Use correct API base URL - same logic as ChatInterface
-        const getApiBaseUrl = () => {
-          if (process.env.NODE_ENV === 'production') {
-            return process.env.REACT_APP_API_BASE_URL_PRODUCTION || 'https://naac-0dgf.onrender.com';
-          }
-          return process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
-        };
-
-  const apiBaseUrl = getApiBaseUrl();
-  console.log('🔗 Dashboard API URL:', `${apiBaseUrl}/api/analytics/dashboard`);
-
-  const response = await fetch(`${apiBaseUrl}/api/analytics/dashboard`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const data = await analyticsAPI.getDashboardStats();
+        console.log('📊 Dashboard Data:', data);
+        setSystemStats({
+          documentsProcessed: data.documentsProcessed || 0,
+          queriesHandled: data.queriesHandled || 0,
+          reportsGenerated: data.reportsGenerated || 0,
+          criteriaCompleted: data.criteriaCompleted || 0,
         });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('📊 Dashboard Data:', data);
-          setSystemStats({
-            documentsProcessed: data.documentsProcessed || 0,
-            queriesHandled: data.queriesHandled || 0,
-            reportsGenerated: data.reportsGenerated || 0,
-            criteriaCompleted: data.criteriaCompleted || 0,
-          });
-        } else {
-          console.error('Dashboard API Error:', response.status);
-          // Set default values if API fails
-          setSystemStats({
-            documentsProcessed: 15,
-            queriesHandled: 89,
-            reportsGenerated: 7,
-            criteriaCompleted: 5,
-          });
-        }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
-        // Set default values if fetch fails
         setSystemStats({
           documentsProcessed: 15,
           queriesHandled: 89,
@@ -97,7 +68,6 @@ const Dashboard = () => {
         });
       }
     };
-    
     fetchStats();
   }, []);
 
@@ -210,15 +180,14 @@ const Dashboard = () => {
             <Card
               sx={{
                 height: '100%',
-                cursor: 'pointer',
                 transition: 'transform 0.2s, box-shadow 0.2s',
                 '&:hover': {
                   transform: 'translateY(-4px)',
                   boxShadow: 4,
                 },
               }}
-              onClick={() => handleQuickActionClick(action.path)}
             >
+              <CardActionArea component={Link} to={action.path} sx={{ height: '100%' }}>
               <CardContent sx={{ textAlign: 'center', p: 3 }}>
                 <Avatar
                   sx={{
@@ -237,18 +206,17 @@ const Dashboard = () => {
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   {action.description}
                 </Typography>
-                <Button 
-                  variant="contained" 
-                  size="small" 
+                <Button
+                  variant="contained"
+                  size="small"
                   sx={{ bgcolor: action.color }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleQuickActionClick(action.path);
-                  }}
+                  component={Link}
+                  to={action.path}
                 >
                   Get Started
                 </Button>
               </CardContent>
+              </CardActionArea>
             </Card>
           </Grid>
         ))}

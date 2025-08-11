@@ -198,7 +198,7 @@ export const bestPracticesAPI = {
 // Analytics API
 export const analyticsAPI = {
   getDashboardStats: async () => {
-    const response = await api.get('/analytics/dashboard');
+  const response = await api.get('/api/analytics/dashboard');
     return response.data;
   },
   

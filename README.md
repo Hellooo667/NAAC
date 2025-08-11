@@ -1,7 +1,3 @@
-# NAAC AI Assistant - Backend API Only
-
-A data processing and AI assistant system for NAAC (National Assessment and Accreditation Council) processes.
-
 ## 🔧 Backend Features
 
 - **Data Processing Pipeline**: Process NAAC institutional datasets

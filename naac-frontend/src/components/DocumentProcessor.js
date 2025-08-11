@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import api from '../services/api';
 import {
   Box,
   Card,
@@ -103,86 +104,52 @@ const DocumentProcessor = ({ onProcessingComplete }) => {
       setProcessingStage('Parsing documents using IBM Watson NLP...');
       setProgress(20);
       
-      const parseResponse = await fetch('/api/documents/parse', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
+      const parseRes = await api.post('/api/documents/parse', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
-      if (!parseResponse.ok) throw new Error('Document parsing failed');
-      const parseResults = await parseResponse.json();
+      const parseResults = parseRes.data;
       
       // Step 2: Content Chunking
       setActiveStep(2);
       setProcessingStage('Chunking content by NAAC criteria...');
       setProgress(40);
       
-      const chunkResponse = await fetch('/api/documents/chunk', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          documentIds: parseResults.documentIds,
-          chunkingStrategy: 'naac_criteria',
-        }),
+      const chunkRes = await api.post('/api/documents/chunk', {
+        documentIds: parseResults.documentIds,
+        chunkingStrategy: 'naac_criteria',
       });
-      
-      if (!chunkResponse.ok) throw new Error('Content chunking failed');
-      const chunkResults = await chunkResponse.json();
+      const chunkResults = chunkRes.data;
       
       // Step 3: Vector Embedding
       setActiveStep(3);
       setProcessingStage('Generating vector embeddings with OpenAI/Cohere...');
       setProgress(60);
       
-      const embedResponse = await fetch('/api/embeddings/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          chunks: chunkResults.chunks,
-          modelType: 'text-embedding-ada-002', // OpenAI embeddings
-          // Alternative: 'embed-english-v2.0' for Cohere
-        }),
+      const embedRes = await api.post('/api/embeddings/generate', {
+        chunks: chunkResults.chunks,
+        modelType: 'text-embedding-ada-002', // OpenAI embeddings
       });
-      
-      if (!embedResponse.ok) throw new Error('Vector embedding failed');
-      const embedResults = await embedResponse.json();
+      const embedResults = embedRes.data;
       
       // Step 4: Pinecone Index Storage
       setActiveStep(4);
       setProcessingStage('Storing vectors in Pinecone database...');
       setProgress(80);
       
-      const indexResponse = await fetch('/api/pinecone/upsert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-        },
-        body: JSON.stringify({
-          vectors: embedResults.embeddings.map((embedding, idx) => ({
-            id: `doc_${Date.now()}_${idx}`,
-            values: embedding.vector,
-            metadata: {
-              ...chunkResults.metadata[idx],
-              text: chunkResults.chunks[idx],
-              source: uploadedFiles[Math.floor(idx / (chunkResults.chunks.length / uploadedFiles.length))].name,
-              timestamp: new Date().toISOString(),
-            },
-          })),
-          namespace: 'naac_documents',
-        }),
+      const indexRes = await api.post('/api/pinecone/upsert', {
+        vectors: embedResults.embeddings.map((embedding, idx) => ({
+          id: `doc_${Date.now()}_${idx}`,
+          values: embedding.vector,
+          metadata: {
+            ...chunkResults.metadata[idx],
+            text: chunkResults.chunks[idx],
+            source: uploadedFiles[Math.floor(idx / (chunkResults.chunks.length / uploadedFiles.length))].name,
+            timestamp: new Date().toISOString(),
+          },
+        })),
+        namespace: 'naac_documents',
       });
-      
-      if (!indexResponse.ok) throw new Error('Index creation failed');
-      const indexResults = await indexResponse.json();
+      const indexResults = indexRes.data;
       
       // Complete processing
       setActiveStep(5);
