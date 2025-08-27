@@ -63,6 +63,7 @@ data/cleaned/
 naac-backend/naac_env/
 naac-backend/*.db
 naac-backend/.env*
+!naac-backend/.env.example
 
 # Logs
 *.log
