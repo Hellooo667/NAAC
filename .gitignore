@@ -54,9 +54,15 @@ yarn-error.log*
 *.code-workspace
 
 # Data files (if containing sensitive information)
+# Data files (if containing sensitive information)
 data/processed/
 data/cleaned/
 *.sqlite3
+
+# Backend local artifacts
+naac-backend/naac_env/
+naac-backend/*.db
+naac-backend/.env*
 
 # Logs
 *.log
