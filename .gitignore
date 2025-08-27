@@ -65,6 +65,11 @@ naac-backend/*.db
 naac-backend/.env*
 !naac-backend/.env.example
 
+# Backend dev-only folders and files
+naac-backend/tests/
+naac-backend/scripts/
+naac-backend/requirements-dev.txt
+
 # Logs
 *.log
 logs/
