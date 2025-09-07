@@ -47,12 +47,15 @@ const Sidebar = ({ open, onToggle }) => {
       sx={{
         width: open ? drawerWidth : collapsedWidth,
         flexShrink: 0,
-        transition: 'width 0.3s',
+        transition: 'width 0.3s ease-in-out',
         '& .MuiDrawer-paper': {
           width: open ? drawerWidth : collapsedWidth,
           boxSizing: 'border-box',
-          transition: 'width 0.3s',
+          transition: 'width 0.3s ease-in-out',
           overflowX: 'hidden',
+          background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
+          borderRight: '1px solid #e2e8f0',
+          boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
         },
       }}
     >
@@ -72,12 +75,24 @@ const Sidebar = ({ open, onToggle }) => {
                     minHeight: 48,
                     justifyContent: open ? 'initial' : 'center',
                     px: 2.5,
+                    borderRadius: 2,
+                    mx: 1,
+                    mb: 0.5,
+                    transition: 'all 0.2s ease-in-out',
                     '&.Mui-selected': {
-                      backgroundColor: 'primary.light',
+                      backgroundColor: 'primary.main',
                       color: 'primary.contrastText',
+                      boxShadow: '0 2px 8px rgba(37, 99, 235, 0.2)',
                       '&:hover': {
-                        backgroundColor: 'primary.main',
+                        backgroundColor: 'primary.dark',
                       },
+                      '& .MuiListItemIcon-root': {
+                        color: 'inherit',
+                      },
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(37, 99, 235, 0.08)',
+                      transform: 'translateX(4px)',
                     },
                   }}
                 >
