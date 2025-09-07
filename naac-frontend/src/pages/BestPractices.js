@@ -42,6 +42,9 @@ const BestPractices = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [anchorEl, setAnchorEl] = useState(null);
+  const [likedPractices, setLikedPractices] = useState(new Set());
+  const [bookmarkedPractices, setBookmarkedPractices] = useState(new Set());
+  const [selectedPracticeId, setSelectedPracticeId] = useState(null);
 
   const categories = [
     { value: 'all', label: 'All Practices' },
@@ -136,12 +139,72 @@ const BestPractices = () => {
     setTabValue(newValue);
   };
 
-  const handleMenuClick = (event) => {
+  const handleMenuClick = (event, practiceId) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
+    setSelectedPracticeId(practiceId);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    setSelectedPracticeId(null);
+  };
+
+  const handleLike = (practiceId) => {
+    setLikedPractices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(practiceId)) {
+        newSet.delete(practiceId);
+      } else {
+        newSet.add(practiceId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleBookmark = (practiceId) => {
+    setBookmarkedPractices(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(practiceId)) {
+        newSet.delete(practiceId);
+      } else {
+        newSet.add(practiceId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleShare = (practice) => {
+    if (navigator.share) {
+      navigator.share({
+        title: practice.title,
+        text: practice.description,
+        url: window.location.href,
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(`${practice.title}\n${practice.description}\n${window.location.href}`);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  const handleSubmitPractice = () => {
+    // For now, show an alert. In a real app, this would open a modal or navigate to a form
+    alert('Submit Practice feature coming soon! This will allow you to share your own best practices with the community.');
+  };
+
+  const handleDownload = (practice) => {
+    // Create a simple text file with practice details
+    const content = `Best Practice: ${practice.title}\n\nDescription: ${practice.description}\n\nInstitution: ${practice.institution}\n\nImplementation: ${practice.implementation}\n\nImpact: ${practice.impact}\n\nResources: ${practice.resources.join(', ')}\n\nTags: ${practice.tags.join(', ')}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${practice.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const filteredPractices = bestPractices.filter(practice => {
@@ -159,7 +222,7 @@ const BestPractices = () => {
           <Typography variant={featured ? "h5" : "h6"} component="h2" gutterBottom>
             {practice.title}
           </Typography>
-          <IconButton size="small" onClick={handleMenuClick}>
+          <IconButton size="small" onClick={(e) => handleMenuClick(e, practice.id)}>
             <MoreVert />
           </IconButton>
         </Box>
@@ -221,21 +284,30 @@ const BestPractices = () => {
       <Box sx={{ p: 2, pt: 0 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Button size="small" startIcon={<ThumbUp />}>
-              {practice.likes}
+            <Button 
+              size="small" 
+              startIcon={<ThumbUp />} 
+              onClick={() => handleLike(practice.id)}
+              color={likedPractices.has(practice.id) ? 'primary' : 'inherit'}
+            >
+              {practice.likes + (likedPractices.has(practice.id) ? 1 : 0)}
             </Button>
             <Button size="small" startIcon={<Comment />}>
               {practice.comments}
             </Button>
           </Box>
           <Box>
-            <IconButton size="small">
+            <IconButton 
+              size="small" 
+              onClick={() => handleBookmark(practice.id)}
+              color={bookmarkedPractices.has(practice.id) ? 'primary' : 'inherit'}
+            >
               <Bookmark />
             </IconButton>
-            <IconButton size="small">
+            <IconButton size="small" onClick={() => handleShare(practice)}>
               <Share />
             </IconButton>
-            <IconButton size="small">
+            <IconButton size="small" onClick={() => handleDownload(practice)}>
               <Download />
             </IconButton>
           </Box>
@@ -250,7 +322,7 @@ const BestPractices = () => {
         <Typography variant="h4" gutterBottom>
           Best Practices Library
         </Typography>
-        <Button variant="contained" startIcon={<Add />}>
+        <Button variant="contained" startIcon={<Add />} onClick={handleSubmitPractice}>
           Submit Practice
         </Button>
       </Box>
@@ -344,14 +416,37 @@ const BestPractices = () => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
       >
-        <MenuItem onClick={handleMenuClose}>
-          <Bookmark sx={{ mr: 1 }} /> Bookmark
+        <MenuItem onClick={() => {
+          if (selectedPracticeId) handleBookmark(selectedPracticeId);
+          handleMenuClose();
+        }}>
+          <Bookmark sx={{ mr: 1 }} /> {bookmarkedPractices.has(selectedPracticeId) ? 'Remove Bookmark' : 'Bookmark'}
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={() => {
+          if (selectedPracticeId) {
+            const practice = bestPractices.find(p => p.id === selectedPracticeId);
+            if (practice) handleShare(practice);
+          }
+          handleMenuClose();
+        }}>
           <Share sx={{ mr: 1 }} /> Share
         </MenuItem>
-        <MenuItem onClick={handleMenuClose}>
+        <MenuItem onClick={() => {
+          if (selectedPracticeId) {
+            const practice = bestPractices.find(p => p.id === selectedPracticeId);
+            if (practice) handleDownload(practice);
+          }
+          handleMenuClose();
+        }}>
           <Download sx={{ mr: 1 }} /> Download Resources
         </MenuItem>
       </Menu>

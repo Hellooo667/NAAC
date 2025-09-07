@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import api from '../services/api';
+import { enhancedDocumentAPI } from '../services/apiExtensions';
 import {
   Box,
   Card,
@@ -48,24 +48,19 @@ const DocumentProcessor = ({ onProcessingComplete }) => {
       stage: 'upload',
     },
     {
-      label: 'Document Parsing',
-      description: 'Extract text and metadata using IBM Watson NLP',
-      stage: 'parsing',
+      label: 'AI Processing',
+      description: 'Process documents using IBM Watson NLP and AI models',
+      stage: 'processing',
     },
     {
-      label: 'Content Chunking',
-      description: 'Segment content by NAAC criteria and academic years',
-      stage: 'chunking',
+      label: 'Vector Generation',
+      description: 'Generate embeddings and store in vector database',
+      stage: 'vectorization',
     },
     {
-      label: 'Vector Embedding',
-      description: 'Generate embeddings using OpenAI/Cohere models',
-      stage: 'embedding',
-    },
-    {
-      label: 'Pinecone Storage',
-      description: 'Store vectors in Pinecone database for retrieval',
-      stage: 'indexing',
+      label: 'Complete',
+      description: 'Documents processed and ready for queries',
+      stage: 'complete',
     },
   ];
 
@@ -99,81 +94,25 @@ const DocumentProcessor = ({ onProcessingComplete }) => {
         formData.append(`documents`, file);
       });
       
-      // Step 1: Document Parsing
-      setActiveStep(1);
-      setProcessingStage('Parsing documents using IBM Watson NLP...');
-      setProgress(20);
+      // Use the enhanced document API
+      setProcessingStage('Processing documents with AI pipeline...');
+      setProgress(25);
       
-      const parseRes = await api.post('/api/documents/parse', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const result = await enhancedDocumentAPI.processDocument(formData, (progress) => {
+        setProgress(25 + (progress * 0.75)); // Scale progress from 25% to 100%
       });
-      const parseResults = parseRes.data;
       
-      // Step 2: Content Chunking
-      setActiveStep(2);
-      setProcessingStage('Chunking content by NAAC criteria...');
-      setProgress(40);
-      
-      const chunkRes = await api.post('/api/documents/chunk', {
-        documentIds: parseResults.documentIds,
-        chunkingStrategy: 'naac_criteria',
-      });
-      const chunkResults = chunkRes.data;
-      
-      // Step 3: Vector Embedding
-      setActiveStep(3);
-      setProcessingStage('Generating vector embeddings with OpenAI/Cohere...');
-      setProgress(60);
-      
-      const embedRes = await api.post('/api/embeddings/generate', {
-        chunks: chunkResults.chunks,
-        modelType: 'text-embedding-ada-002', // OpenAI embeddings
-      });
-      const embedResults = embedRes.data;
-      
-      // Step 4: Pinecone Index Storage
+      setProcessingResults(result);
       setActiveStep(4);
-      setProcessingStage('Storing vectors in Pinecone database...');
-      setProgress(80);
-      
-      const indexRes = await api.post('/api/pinecone/upsert', {
-        vectors: embedResults.embeddings.map((embedding, idx) => ({
-          id: `doc_${Date.now()}_${idx}`,
-          values: embedding.vector,
-          metadata: {
-            ...chunkResults.metadata[idx],
-            text: chunkResults.chunks[idx],
-            source: uploadedFiles[Math.floor(idx / (chunkResults.chunks.length / uploadedFiles.length))].name,
-            timestamp: new Date().toISOString(),
-          },
-        })),
-        namespace: 'naac_documents',
-      });
-      const indexResults = indexRes.data;
-      
-      // Complete processing
-      setActiveStep(5);
-      setProcessingStage('Processing complete!');
       setProgress(100);
       
-      const results = {
-        documentsProcessed: uploadedFiles.length,
-        chunksCreated: chunkResults.chunks.length,
-        embeddingsGenerated: embedResults.embeddings.length,
-        indexedVectors: indexResults.vectorCount,
-        criteria: chunkResults.criteriaDistribution,
-        processingTime: indexResults.processingTime,
-      };
-      
-      setProcessingResults(results);
-      
       if (onProcessingComplete) {
-        onProcessingComplete(results);
+        onProcessingComplete(result);
       }
       
     } catch (error) {
-      console.error('Document processing error:', error);
-      alert(`Processing failed: ${error.message}`);
+      console.error('Document processing failed:', error);
+      alert('Document processing failed. Please try again.');
     } finally {
       setProcessing(false);
     }

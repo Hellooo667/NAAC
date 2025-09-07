@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 
-const ParticleBackground = ({ darkMode = false }) => {
+const ParticleBackground = () => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -29,9 +29,7 @@ const ParticleBackground = ({ darkMode = false }) => {
         this.vy = (Math.random() - 0.5) * 0.5;
         this.size = Math.random() * 2 + 1;
         this.opacity = Math.random() * 0.5 + 0.2;
-        this.color = darkMode
-          ? `rgba(${Math.floor(Math.random() * 100 + 155)}, ${Math.floor(Math.random() * 100 + 100)}, ${Math.floor(Math.random() * 100 + 200)}, ${this.opacity})`
-          : `rgba(${Math.floor(Math.random() * 50 + 100)}, ${Math.floor(Math.random() * 50 + 150)}, ${Math.floor(Math.random() * 50 + 200)}, ${this.opacity})`;
+        this.color = `rgba(${Math.floor(Math.random() * 50 + 100)}, ${Math.floor(Math.random() * 50 + 150)}, ${Math.floor(Math.random() * 50 + 200)}, ${this.opacity})`;
       }
 
       update() {
@@ -48,7 +46,7 @@ const ParticleBackground = ({ darkMode = false }) => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fillStyle = this.color.replace(/[\d\.]+\)$/g, this.opacity + ')');
+        ctx.fillStyle = this.color.replace(/[\d.]+$/g, this.opacity + ')');
         ctx.fill();
       }
     }
@@ -81,9 +79,7 @@ const ParticleBackground = ({ darkMode = false }) => {
             ctx.beginPath();
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.strokeStyle = darkMode
-              ? `rgba(129, 140, 248, ${(100 - distance) / 500})`
-              : `rgba(99, 102, 241, ${(100 - distance) / 500})`;
+            ctx.strokeStyle = `rgba(99, 102, 241, ${(100 - distance) / 500})`;
             ctx.lineWidth = 0.5;
             ctx.stroke();
           }
@@ -98,7 +94,7 @@ const ParticleBackground = ({ darkMode = false }) => {
     return () => {
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [darkMode]);
+  }, []);
 
   return (
     <Box

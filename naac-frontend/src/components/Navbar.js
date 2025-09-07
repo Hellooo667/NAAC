@@ -9,19 +9,15 @@ import {
   Menu,
   MenuItem,
   Chip,
-  Switch,
-  FormControlLabel,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   AccountCircle,
   Settings,
   Logout,
-  Brightness4,
-  Brightness7,
 } from '@mui/icons-material';
 
-const Navbar = ({ onMenuClick, darkMode, onToggleDarkMode }) => {
+const Navbar = ({ onMenuClick }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleMenu = (event) => {
@@ -93,30 +89,6 @@ const Navbar = ({ onMenuClick, darkMode, onToggleDarkMode }) => {
           <Typography variant="body2" sx={{ mr: 2, display: { xs: 'none', sm: 'block' } }}>
             Powered by IBM Granite
           </Typography>
-          
-          <FormControlLabel
-            control={
-              <Switch
-                checked={darkMode}
-                onChange={onToggleDarkMode}
-                icon={<Brightness7 />}
-                checkedIcon={<Brightness4 />}
-                sx={{
-                  '& .MuiSwitch-switchBase': {
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    '&.Mui-checked': {
-                      color: '#6366f1',
-                      '& + .MuiSwitch-track': {
-                        backgroundColor: '#6366f1',
-                      },
-                    },
-                  },
-                }}
-              />
-            }
-            label=""
-            sx={{ mr: 1 }}
-          />
           
           <IconButton
             size="large"
