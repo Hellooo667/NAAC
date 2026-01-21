@@ -41,13 +41,6 @@ POST /process - Process new documents
 GET /datasets - List available datasets
 ```
 
-## Environment Variables
-
-Required environment variables (see `.env.example`):
-- `IBM_CLOUD_API_KEY` - IBM Granite LLM access
-- `PINECONE_API_KEY` - Vector database
-- `COHERE_API_KEY` - Embeddings (optional)
-
 ## Usage
 
 ```python
