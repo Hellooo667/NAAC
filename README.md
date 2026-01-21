@@ -1,4 +1,4 @@
-## 🔧 Backend Features
+## Backend Features
 
 - **Data Processing Pipeline**: Process NAAC institutional datasets
 - **Document Analysis**: Extract and analyze NAAC documents  
@@ -6,7 +6,7 @@
 - **AI Assistant**: IBM Granite LLM with RAG capabilities
 - **API Endpoints**: RESTful API for NAAC queries
 
-## 📊 Data Processing
+## Data Processing
 
 The system processes:
 - ✅ Institutional datasets (CSV/Excel)
@@ -14,7 +14,7 @@ The system processes:
 - ✅ Vector embeddings for semantic search
 - ✅ RAG pipeline for question answering
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -32,7 +32,7 @@ cd naac-backend
 python main.py
 ```
 
-## 📡 API Endpoints
+## API Endpoints
 
 ```
 POST /query - Submit NAAC queries
@@ -41,14 +41,14 @@ POST /process - Process new documents
 GET /datasets - List available datasets
 ```
 
-## 🔒 Environment Variables
+## Environment Variables
 
 Required environment variables (see `.env.example`):
 - `IBM_CLOUD_API_KEY` - IBM Granite LLM access
 - `PINECONE_API_KEY` - Vector database
 - `COHERE_API_KEY` - Embeddings (optional)
 
-## 📝 Usage
+## Usage
 
 ```python
 import requests
@@ -59,14 +59,14 @@ response = requests.post('http://localhost:8000/query',
 print(response.json())
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 - **Backend**: FastAPI Python server
 - **Database**: ChromaDB + Pinecone Cloud
 - **AI**: IBM Granite LLM with RAG
 - **Processing**: Jupyter notebook pipeline
 
-## 📚 Documentation
+## Documentation
 
 - `NAAC_Data_Processing_Pipeline.ipynb` - Complete data pipeline
 - `SECURITY.md` - Security guidelines
